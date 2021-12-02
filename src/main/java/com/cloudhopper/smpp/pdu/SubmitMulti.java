@@ -22,7 +22,7 @@ package com.cloudhopper.smpp.pdu;
 
 import com.cloudhopper.smpp.SmppConstants;
 
-public class SubmitMulti extends BaseSm<SubmitMultiResp> {
+public class SubmitMulti extends BaseSmMulti<SubmitMultiResp> {
 
     public SubmitMulti() {
         super(SmppConstants.CMD_ID_SUBMIT_MULTI, "submit_multi");
