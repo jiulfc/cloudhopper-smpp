@@ -9,9 +9,9 @@ package com.cloudhopper.smpp.transcoder;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,10 +31,8 @@ import com.cloudhopper.smpp.util.PduUtil;
 import com.cloudhopper.smpp.util.SequenceNumber;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.ByteOrder;
 
 /**
- * 
  * @author joelauer (twitter: @jjlauer or <a href="http://twitter.com/jjlauer" target=window>http://twitter.com/jjlauer</a>)
  */
 public class DefaultPduTranscoder implements PduTranscoder {
@@ -49,7 +47,7 @@ public class DefaultPduTranscoder implements PduTranscoder {
     public ByteBuf encode(Pdu pdu) throws UnrecoverablePduException, RecoverablePduException {
         // see if we can map the command status into a message
         if (pdu instanceof PduResponse) {
-            PduResponse response = (PduResponse)pdu;
+            PduResponse response = (PduResponse) pdu;
             if (response.getResultMessage() == null) {
                 response.setResultMessage(context.lookupResultMessage(pdu.getCommandStatus()));
             }
@@ -62,18 +60,18 @@ public class DefaultPduTranscoder implements PduTranscoder {
             pdu.calculateAndSetCommandLength();
         }
 
-	// @trustin:
-	// You don't need to call buffer.order(ByteOrder.BIG_ENDIAN).  It's always big endian in Netty 4.
-	// Instead of allocating an unpooled buffer, please use ByteBufAllocator.buffer(...). To do this,
-	// PduTranscoder.encode() must have ByteBufAllocator as an additional parameter.  In your handler,
-	// you'll usually get your allocator using ChannelHandlerContext.alloc() (or Channel.alloc()) method:
-	//     ByteBuf pduBuf = transcoder.encode(ctx.alloc());
-	// The default implementation is an unpooled allocator, so you will not see the difference.
-	// In your bootstrap code, set the following option:
-	//     serverBootstrap.childOption(
-	//             ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-	//     clientBootstrap.option(
-	//             ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+        // @trustin:
+        // You don't need to call buffer.order(ByteOrder.BIG_ENDIAN).  It's always big endian in Netty 4.
+        // Instead of allocating an unpooled buffer, please use ByteBufAllocator.buffer(...). To do this,
+        // PduTranscoder.encode() must have ByteBufAllocator as an additional parameter.  In your handler,
+        // you'll usually get your allocator using ChannelHandlerContext.alloc() (or Channel.alloc()) method:
+        //     ByteBuf pduBuf = transcoder.encode(ctx.alloc());
+        // The default implementation is an unpooled allocator, so you will not see the difference.
+        // In your bootstrap code, set the following option:
+        //     serverBootstrap.childOption(
+        //             ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+        //     clientBootstrap.option(
+        //             ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
         // create the buffer and add the header
         ByteBuf buffer = Unpooled.buffer(pdu.getCommandLength());
@@ -98,7 +96,7 @@ public class DefaultPduTranscoder implements PduTranscoder {
 
         return buffer;
     }
-    
+
     @Override
     public Pdu decode(ByteBuf buffer) throws UnrecoverablePduException, RecoverablePduException {
         // wait until the length prefix is available
@@ -150,6 +148,8 @@ public class DefaultPduTranscoder implements PduTranscoder {
                 pdu = new DeliverSm();
             } else if (commandId == SmppConstants.CMD_ID_SUBMIT_SM) {
                 pdu = new SubmitSm();
+            } else if (commandId == SmppConstants.CMD_ID_SUBMIT_MULTI) {
+                pdu = new SubmitMulti();
             } else if (commandId == SmppConstants.CMD_ID_DATA_SM) {
                 pdu = new DataSm();
             } else if (commandId == SmppConstants.CMD_ID_CANCEL_SM) {
@@ -174,6 +174,8 @@ public class DefaultPduTranscoder implements PduTranscoder {
         } else {
             if (commandId == SmppConstants.CMD_ID_SUBMIT_SM_RESP) {
                 pdu = new SubmitSmResp();
+            } else if (commandId == SmppConstants.CMD_ID_SUBMIT_MULTI_RESP) {
+                pdu = new SubmitMultiResp();
             } else if (commandId == SmppConstants.CMD_ID_DELIVER_SM_RESP) {
                 pdu = new DeliverSmResp();
             } else if (commandId == SmppConstants.CMD_ID_DATA_SM_RESP) {
@@ -215,7 +217,7 @@ public class DefaultPduTranscoder implements PduTranscoder {
 
         // see if we can map the command status into a message
         if (pdu instanceof PduResponse) {
-            PduResponse response = (PduResponse)pdu;
+            PduResponse response = (PduResponse) pdu;
             response.setResultMessage(context.lookupResultMessage(commandStatus));
         }
 
