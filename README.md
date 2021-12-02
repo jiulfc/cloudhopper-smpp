@@ -3,6 +3,12 @@ Cloudhopper SMPP by Fizzed (forked from Twitter)
 
 [![Build Status](https://secure.travis-ci.org/fizzed/cloudhopper-smpp.png?branch=master)](http://travis-ci.org/fizzed/cloudhopper-smpp)
 
+
+Updates
+------------------------
+folk源库，增加对 submit_multi的支持
+
+
 News
 ------------------------
 

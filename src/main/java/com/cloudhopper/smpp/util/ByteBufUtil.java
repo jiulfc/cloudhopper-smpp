@@ -28,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -54,6 +56,19 @@ public class ByteBufUtil {
         return address;
     }
 
+    static public List<DestAddress> readDestAddressList(byte count, ByteBuf buffer) throws UnrecoverablePduException, RecoverablePduException {
+        List<DestAddress> addressMultiList = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            byte destFlag = buffer.readByte();
+            if (destFlag == SmppConstants.SM_DEST_SME_ADDRESS) {
+                addressMultiList.add(new DestAddress(destFlag, readAddress(buffer)));
+            } else if (destFlag == SmppConstants.SM_DEST_DL_NAME) {
+                addressMultiList.add(new DestAddress(destFlag, ByteBufUtil.readNullTerminatedString(buffer)));
+            }
+        }
+        return addressMultiList;
+    }
+
     /**
      * Writes an address to a buffer.  If the address is null, this method will
      * safely write out the SmppConstants.EMPTY_ADDRESS instance.
@@ -67,6 +82,12 @@ public class ByteBufUtil {
             SmppConstants.EMPTY_ADDRESS.write(buffer);
         } else {
             value.write(buffer);
+        }
+    }
+
+    static public void writeDestAddressList(ByteBuf buffer, List<DestAddress> values) throws UnrecoverablePduException, RecoverablePduException {
+        for (DestAddress address : values) {
+            address.write(buffer);
         }
     }
     

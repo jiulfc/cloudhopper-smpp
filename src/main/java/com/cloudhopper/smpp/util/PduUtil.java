@@ -22,6 +22,9 @@ package com.cloudhopper.smpp.util;
 
 import com.cloudhopper.smpp.SmppConstants;
 import com.cloudhopper.smpp.type.Address;
+import com.cloudhopper.smpp.type.DestAddress;
+
+import java.util.List;
 
 /**
  *
@@ -54,6 +57,14 @@ public class PduUtil {
         } else {
             return value.calculateByteSize();
         }
+    }
+
+    static public int calculateByteSizeOfDestAddressList(List<DestAddress> values) {
+        int size = 0;
+        for (DestAddress address : values) {
+            size += address.calculateByteSize();
+        }
+        return size;
     }
 
     static public boolean isRequestCommandId(int commandId) {
